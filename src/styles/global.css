@@ -1807,6 +1807,8 @@ h2 + .rows {
   margin-bottom: 0.5em;
 }
 .term-line {
+  /* el campo oculto vive en esta línea: si no, al escribir el navegador salta al principio de la consola */
+  position: relative;
   display: block;
   cursor: text;
   overflow-wrap: anywhere;

@@ -284,7 +284,7 @@ const termPayload = {
         </div>
       </dialog>
       <p class="off-boot" role="status" data-off-boot><span data-boot-text></span><span class="off-dots" data-boot-dots></span></p>
-      <div class="off-console" data-off-console>
+      <div class="off-console" data-off-console data-lenis-prevent>
         <div class="term-out" role="log" aria-live="polite" data-term-out></div>
         <label class="term-line">
           <span class="off-prompt" aria-hidden="true" data-term-prompt>$</span>
@@ -1023,6 +1023,11 @@ const termPayload = {
 
       termInput.addEventListener('input', () => setLine(termInput.value));
       termInput.addEventListener('keydown', (e) => {
+        if (e.key === 'PageUp' || e.key === 'PageDown') {
+          e.preventDefault();
+          term.scrollBy({ top: (e.key === 'PageUp' ? -1 : 1) * term.clientHeight * 0.85 });
+          return;
+        }
         if (pw) return pwKey(e);
         if (e.key === 'Enter') {
           const v = termInput.value;
