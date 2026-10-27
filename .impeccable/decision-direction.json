@@ -1,0 +1,118 @@
+{
+  "title": "Rediseño: elige el nuevo mundo visual",
+  "question": "La tirada asignó El Paquete. Quédate con él, elige otra o repite.",
+  "options": [
+    {
+      "id": "assigned",
+      "kind": "assigned",
+      "label": "El Paquete",
+      "kicker": "LA TIRADA",
+      "lineage": "encapsulación de red y colores de captura de paquetes",
+      "thesis": "Un único paquete de datos que viaja contigo mientras bajas: cada sección le añade una capa, y el scroll es el cable.",
+      "palette": ["#0e1014", "#9be3c4", "#8f9bff", "#ff9fb8", "#ffd36b", "#ff6a2b"],
+      "materials": ["capas translúcidas en 3D", "etiquetas de cabecera", "tipografía condensada"],
+      "viewport": "Tu nombre como carga útil flotando en un escenario oscuro; al bajar, cabeceras de color se apilan alrededor sin saltos de sección, y el CV es lo único en naranja brasa.",
+      "risk": "Se queda en diagrama de redes de clase si las capas no son el contenido real y la transición no es continua.",
+      "raised": [
+        { "from": "Alfarería raku", "raise": "El naranja brasa queda reservado a lo que está vivo: la capa activa, el máster en curso y el CV." },
+        { "from": "Bosque luminiscente", "raise": "El brillo es atención: la capa que estás leyendo se ilumina y las demás se apagan con estela." }
+      ]
+    },
+    {
+      "id": "model-pick",
+      "kind": "pick",
+      "label": "La Cadena de Confianza",
+      "kicker": "LA ELECCIÓN DE IMPECCABLE",
+      "lineage": "cadenas de certificados X.509",
+      "thesis": "Formación y certificaciones como una cadena firmada: cada certificado avala al siguiente al bajar.",
+      "palette": ["#0c0f14", "#e8e6df", "#3ddc97", "#b4a7ff"],
+      "materials": ["certificados apilados", "sellos de verificación"],
+      "viewport": "Un certificado raíz en grande que se pliega hacia atrás mientras el siguiente se firma delante.",
+      "risk": "Muy legible, pero encaja menos con proyectos y experiencia."
+    },
+    {
+      "id": "challenger-algorave",
+      "kind": "challenger",
+      "catalogId": "medium-native-algorave-source-floor",
+      "label": "Pista algorave",
+      "verdict": "declined",
+      "lineage": "código en vivo proyectado",
+      "palette": ["#050805", "#39ff88", "#ff2bd6"],
+      "materials": ["búfer de código", "sintaxis fosforescente"],
+      "case": "Es la estética hacker que descartaste.",
+      "kept": "Todo comparte un solo reloj."
+    },
+    {
+      "id": "challenger-teletext",
+      "kind": "challenger",
+      "catalogId": "broadcast-programming-teletext-service",
+      "label": "Teletexto",
+      "verdict": "declined",
+      "lineage": "revistas de teletexto",
+      "palette": ["#000000", "#ffff00", "#00ffff"],
+      "materials": ["mosaico de bloques", "rejilla de 40 columnas"],
+      "case": "Se lee viejo, justo lo que quieres evitar.",
+      "kept": "Una rejilla rígida que nunca se rompe."
+    },
+    {
+      "id": "challenger-wuxia",
+      "kind": "challenger",
+      "catalogId": "posters-covers-sleeves-wuxia-painted-hoarding",
+      "label": "Cartel wuxia pintado",
+      "verdict": "declined",
+      "lineage": "carteleras de cine pintadas",
+      "palette": ["#c7432b", "#1c1c1c", "#d6b25e"],
+      "materials": ["tinta", "pincel"],
+      "case": "Una escena fija contradice el scroll continuo que pides.",
+      "kept": "Un color reservado para el trazo principal."
+    },
+    {
+      "id": "challenger-pushpin",
+      "kind": "challenger",
+      "catalogId": "brand-identity-canon-push-pin-poster",
+      "label": "Cartel Push Pin",
+      "verdict": "declined",
+      "lineage": "ilustración de los años 70",
+      "palette": ["#f2e6d0", "#ef5a9a", "#1fb5a8"],
+      "materials": ["papel crema", "color plano"],
+      "case": "Estética retro y sin relación con ciberseguridad.",
+      "kept": "Color plano sin degradados ni sombras."
+    },
+    {
+      "id": "challenger-raku",
+      "kind": "challenger",
+      "catalogId": "clay-ceramics-fracture-raku-smoke-flash",
+      "label": "Cerámica raku",
+      "verdict": "declined",
+      "lineage": "cocción raku",
+      "palette": ["#16130f", "#d8d8d4", "#ff6a2b"],
+      "materials": ["arcilla carbonizada", "esmalte craquelado"],
+      "case": "Material precioso, pero no comunica seguridad.",
+      "kept": "Naranja brasa solo para lo que está caliente."
+    },
+    {
+      "id": "challenger-understory",
+      "kind": "challenger",
+      "catalogId": "dream-surreal-impossible-worlds-luminescent-alien-understory",
+      "label": "Sotobosque luminiscente",
+      "verdict": "declined",
+      "lineage": "bosque alienígena de noche",
+      "palette": ["#06080a", "#5ce1e6", "#b79cff"],
+      "materials": ["esporas", "venas de luz"],
+      "case": "Cae en negro con brillos de neón y no cuenta tu perfil.",
+      "kept": "El brillo como atención."
+    }
+  ],
+  "reroll": { "registers": ["safer", "bolder"] },
+  "canon": true,
+  "canonCard": {
+    "kind": "canon",
+    "label": "El estándar actual",
+    "thesis": "Portfolio oscuro moderno con scroll suave, acento verde y tarjetas.",
+    "palette": ["#0b0b0c", "#f4f4f2", "#4ade80"],
+    "materials": ["fondo oscuro", "serif con cursiva"],
+    "viewport": "Titular serif con palabra en cursiva verde y CV como botón.",
+    "risk": "Es lo que ya hacen muchas webs; sin identidad propia."
+  },
+  "steer": true
+}

@@ -1,0 +1,134 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-10-27T00:00:00.000Z",
+  "title": "Design System: Portfolio 2026",
+  "extensions": {
+    "colorMeta": {
+      "ground": { "role": "neutral", "displayName": "Dead Screen Olive", "canonical": "#070c05", "tonalRamp": ["#070c05", "#0d1608", "#12150e", "#1c2a10", "#2c4216", "#46681f", "#6a9c28", "#a2d935"] },
+      "panel": { "role": "neutral", "displayName": "Tube Glass", "canonical": "#0d1608", "tonalRamp": ["#070c05", "#0d1608", "#142210", "#1c2a10", "#26430f", "#365a16", "#4c7a1e", "#6a9c28"] },
+      "bezel": { "role": "neutral", "displayName": "Bezel Plastic", "canonical": "#12150e", "tonalRamp": ["#0a0c07", "#12150e", "#1a1e13", "#232919", "#2d3520", "#3a4528", "#4a5832", "#5c6e3e"] },
+      "on-phosphor": { "role": "neutral", "displayName": "Ink on Glow", "canonical": "#0a1205", "tonalRamp": ["#050902", "#0a1205", "#101d08", "#17290c", "#1f3910", "#294b15", "#335e1a", "#3f7420"] },
+      "text": { "role": "neutral", "displayName": "Body Phosphor", "canonical": "#bfe83a", "tonalRamp": ["#26430f", "#4a6d12", "#6f9a1a", "#93c125", "#bfe83a", "#cdee6a", "#ddf59a", "#eefacc"] },
+      "muted": { "role": "neutral", "displayName": "Faded Phosphor", "canonical": "#7fa83a", "tonalRamp": ["#1f2e0d", "#32491a", "#4b6c25", "#638b30", "#7fa83a", "#9bbf62", "#b8d58f", "#d6eabf"] },
+      "phosphor-1": { "role": "primary", "displayName": "Hot Phosphor", "canonical": "#c3f23b", "tonalRamp": ["#26430f", "#4a6d12", "#6f9a1a", "#98c426", "#c3f23b", "#d2f66b", "#e1f99b", "#f0fccd"] },
+      "phosphor-2": { "role": "secondary", "displayName": "Phosphor Step 2", "canonical": "#a2d935", "tonalRamp": ["#223a0e", "#3f5f14", "#5c8a1b", "#7fb02a", "#a2d935", "#b8e45f", "#cfee92", "#e6f7c8"] },
+      "phosphor-3": { "role": "secondary", "displayName": "Phosphor Step 3", "canonical": "#86bb2d", "tonalRamp": ["#1f330c", "#365412", "#4f7619", "#689922", "#86bb2d", "#a0cc57", "#bcdd8b", "#dbeec3"] },
+      "phosphor-4": { "role": "secondary", "displayName": "Phosphor Step 4", "canonical": "#6a9c28", "tonalRamp": ["#1a2c0a", "#2c4910", "#406818", "#528320", "#6a9c28", "#86b250", "#a6c985", "#cbe0b9"] },
+      "phosphor-5": { "role": "primary", "displayName": "Bloom White-Green", "canonical": "#e9ffa8", "tonalRamp": ["#4a5a1a", "#718a28", "#98b83a", "#bad65c", "#d4ec84", "#e9ffa8", "#f2ffc6", "#f9ffe3"] }
+    },
+    "typographyMeta": {
+      "display": { "displayName": "Display", "purpose": "H1 name only; Silkscreen 700, uppercase, layered glow shadow." },
+      "headline": { "displayName": "Headline", "purpose": "Section H2, colored by that section's phosphor step." },
+      "title": { "displayName": "Title", "purpose": "Row/project H3 and button labels in Silkscreen." },
+      "body": { "displayName": "Body", "purpose": "VT323 paragraphs and lede." },
+      "label": { "displayName": "Label", "purpose": "OSD, legend, nav links, stack names; VT323 uppercase tracked." }
+    },
+    "shadows": [
+      { "name": "bezel", "value": "0 0 0 200vmax #12150e, inset 0 0 110px rgb(0 0 0 / 0.75), inset 0 0 0 3px rgb(195 242 59 / 0.1), inset 0 0 40px rgb(195 242 59 / 0.07)", "purpose": "Monitor frame and inner vignette." },
+      { "name": "phosphor-halo", "value": "0 0 20px rgb(195 242 59 / 0.35)", "purpose": "Glow on emitting elements (CV button, nav)." },
+      { "name": "slab-bloom", "value": "0 0 calc(var(--W) * (0.1 + 0.3 * var(--l))) color-mix(in oklab, var(--c) calc(30% + 60% * var(--l)), transparent)", "purpose": "Packet layer glow that peaks as the layer lands." },
+      { "name": "text-glow", "value": "-1px 0 0 rgb(255 70 120 / 0.2), 1px 0 0 rgb(70 255 255 / 0.18), 0 0 8px rgb(195 242 59 / 0.35)", "purpose": "Body-wide CRT fringe and bloom; removed on solid fills." }
+    ],
+    "motion": [
+      { "name": "ease-out", "value": "cubic-bezier(0.16, 1, 0.3, 1)", "purpose": "Packet fly-in and slab rise." },
+      { "name": "tape-step", "value": "steps(3) 0.2s", "purpose": "Button hover/press and stamp: hardware-like stepped motion." },
+      { "name": "scroll-smoothing", "value": "Lenis lerp 0.085", "purpose": "Drives --v, --a, --l, --f, --s custom properties." },
+      { "name": "loader", "value": "~4s randomized", "purpose": "VHS insert-tape entry; hidden under prefers-reduced-motion." }
+    ],
+    "breakpoints": [
+      { "name": "mobile", "value": "820px" }
+    ]
+  },
+  "components": [
+    {
+      "name": "CV Button",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "Solid phosphor call to action with ink-on-glow label.",
+      "html": "<a class=\"ds-btn\" href=\"#\">Descargar CV</a>",
+      "css": ".ds-btn{display:inline-flex;align-items:center;min-height:52px;padding-inline:22px;font-family:'Silkscreen','Courier New',monospace;font-weight:600;font-size:.9375rem;letter-spacing:.04em;text-transform:uppercase;text-decoration:none;color:var(--on-ph,#0a1205);background:var(--p1,#c3f23b);border:2px solid var(--p5,#e9ffa8);box-shadow:0 0 20px rgb(195 242 59/.35);transition:transform .2s steps(3),box-shadow .2s steps(3)}.ds-btn:hover{transform:translate(-2px,-2px);box-shadow:0 0 28px rgb(195 242 59/.5)}.ds-btn:active{transform:translate(3px,3px)}.ds-btn:focus-visible{outline:3px dashed var(--p5,#e9ffa8);outline-offset:4px}"
+    },
+    {
+      "name": "Tape Menu Bar",
+      "kind": "nav",
+      "refersTo": "nav-pill",
+      "description": "Floating bottom nav with a solid active block.",
+      "html": "<nav class=\"ds-pill\"><span class=\"ds-brand\">RC</span><a aria-current=\"page\" href=\"#\">Perfil</a><a href=\"#\">Proyectos</a><a href=\"#\">Contacto</a></nav>",
+      "css": ".ds-pill{display:flex;align-items:center;gap:4px;padding:5px;background:var(--panel,#0d1608);border:2px solid var(--p3,#86bb2d);box-shadow:0 0 18px rgb(195 242 59/.18);font-family:'VT323','Courier New',monospace}.ds-pill a{min-height:40px;display:inline-grid;place-items:center;padding-inline:12px;font-size:1.3125rem;letter-spacing:.05em;text-transform:uppercase;color:var(--muted,#7fa83a);text-decoration:none}.ds-pill a:hover{color:var(--p1,#c3f23b)}.ds-pill a[aria-current]{background:var(--p3,#86bb2d);color:var(--on-ph,#0a1205)}.ds-pill a:focus-visible{outline:3px dashed var(--p5,#e9ffa8);outline-offset:4px}.ds-brand{font-family:'Silkscreen',monospace;font-size:.9375rem;padding-inline:10px;color:var(--p1,#c3f23b)}"
+    },
+    {
+      "name": "Inline Link",
+      "kind": "custom",
+      "refersTo": "text",
+      "description": "Dotted underline that turns solid and brightens on hover.",
+      "html": "<a class=\"ds-link\" href=\"#\">github.com/usuario</a>",
+      "css": ".ds-link{font-family:'VT323',monospace;font-size:1.5rem;color:var(--p1,#c3f23b);text-decoration:underline dotted 2px;text-underline-offset:.25em}.ds-link:hover{color:var(--p5,#e9ffa8);text-decoration-style:solid}.ds-link:focus-visible{outline:3px dashed var(--p5,#e9ffa8);outline-offset:4px}"
+    },
+    {
+      "name": "Timeline Row with Live Badge",
+      "kind": "custom",
+      "refersTo": "badge-live",
+      "description": "Dashed-rule row with a blinking en-curso badge.",
+      "html": "<ul class=\"ds-rows\"><li class=\"ds-row\"><div><h3>Rol</h3><p class=\"ds-org\">Organizacion</p></div><p class=\"ds-live\">En curso</p></li></ul>",
+      "css": ".ds-rows{list-style:none;margin:0;padding:0;border-top:2px dashed rgb(127 168 58/.35);font-family:'VT323',monospace;font-size:1.375rem;color:var(--text,#bfe83a)}.ds-row{display:flex;align-items:baseline;justify-content:space-between;gap:24px;padding-block:18px;border-bottom:2px dashed rgb(127 168 58/.35)}.ds-row h3{margin:0;font-family:'Silkscreen',monospace;font-weight:600;font-size:1.125rem;line-height:1.3;text-transform:uppercase}.ds-org{margin:.25rem 0 0;color:var(--muted,#7fa83a)}.ds-live{margin:0;display:inline-block;padding:2px 10px;letter-spacing:.05em;text-transform:uppercase;color:var(--on-ph,#0a1205);background:var(--p1,#c3f23b);animation:ds-blink 1.4s steps(2) infinite}@keyframes ds-blink{50%{opacity:0}}@media (prefers-reduced-motion:reduce){.ds-live{animation:none}}"
+    },
+    {
+      "name": "OSD Play and Volume",
+      "kind": "custom",
+      "refersTo": "text",
+      "description": "Tape OSD: CSS-drawn play mark and a ten-block volume meter.",
+      "html": "<div class=\"ds-osd\"><button class=\"ds-play\"><i></i>PLAY</button><span class=\"ds-vol\">VOL <span class=\"ds-meter\"></span></span></div>",
+      "css": ".ds-osd{display:flex;align-items:center;gap:18px;font-family:'VT323',monospace;font-size:1.5rem;letter-spacing:.06em;color:var(--p5,#e9ffa8)}.ds-play{display:inline-flex;align-items:center;gap:10px;min-height:40px;padding:0 10px 0 6px;font:inherit;letter-spacing:inherit;color:inherit;background:transparent;border:2px solid transparent;cursor:pointer}.ds-play:hover{border-color:var(--p4,#6a9c28);background:rgb(7 12 5/.6)}.ds-play:active{background:var(--p1,#c3f23b);color:var(--on-ph,#0a1205)}.ds-play:focus-visible{outline:3px dashed var(--p5,#e9ffa8);outline-offset:4px}.ds-play i{width:12px;height:16px;background:currentColor;clip-path:polygon(0 0,100% 50%,0 100%)}.ds-vol{display:inline-flex;align-items:center;gap:10px;font-size:1.25rem;color:var(--p3,#86bb2d)}.ds-meter{width:140px;height:22px;background:linear-gradient(90deg,var(--p5,#e9ffa8) 20%,rgb(195 242 59/.2) 0);-webkit-mask:linear-gradient(90deg,#000 0 78%,transparent 78%) 0 0/10% 100% repeat-x;mask:linear-gradient(90deg,#000 0 78%,transparent 78%) 0 0/10% 100% repeat-x}"
+    },
+    {
+      "name": "Packet Slab",
+      "kind": "card",
+      "refersTo": "slab",
+      "description": "One dot-matrix layer of the packet with ruler and band label.",
+      "html": "<div class=\"ds-slab\"><span class=\"ds-ruler\"></span><span class=\"ds-band\">Capa de red</span></div>",
+      "css": ".ds-slab{--c:var(--p3,#86bb2d);position:relative;width:300px;height:190px;background:var(--panel,#0d1608);border:2px solid var(--c);box-shadow:0 0 30px color-mix(in oklab,var(--c) 30%,transparent),inset 0 0 0 4px var(--panel,#0d1608),inset 0 0 0 5px color-mix(in oklab,var(--c) 55%,transparent);overflow:hidden}.ds-slab::before{content:'';position:absolute;inset:0;opacity:.32;background-image:radial-gradient(circle,var(--c) 0 3px,transparent 3.6px);background-size:10px 10px}.ds-ruler{position:absolute;top:6px;left:10px;right:10px;height:6px;opacity:.7;background-image:linear-gradient(90deg,var(--c) 1px,transparent 1px);background-size:calc(100%/32) 100%}.ds-band{position:absolute;left:10px;right:10px;bottom:6px;font-family:'VT323',monospace;font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--c)}"
+    },
+    {
+      "name": "Sent Stamp",
+      "kind": "custom",
+      "refersTo": "text",
+      "description": "Rotated dashed-border ENVIADO stamp with timestamp.",
+      "html": "<div class=\"ds-stamp\"><b>ENVIADO</b><span>SENT</span><small>2026-10-27 12:00:00</small></div>",
+      "css": ".ds-stamp{display:inline-grid;gap:4px;justify-items:center;padding:10px 22px;border:3px dashed var(--p5,#e9ffa8);background:rgb(7 12 5/.82);color:var(--p5,#e9ffa8);text-align:center;transform:rotate(-7deg)}.ds-stamp b{font-family:'Silkscreen',monospace;font-weight:700;font-size:2rem;letter-spacing:.08em}.ds-stamp span{font-family:'VT323',monospace;font-size:1.5rem;letter-spacing:.12em}.ds-stamp small{font-family:'VT323',monospace;font-size:1.125rem;letter-spacing:.1em;color:var(--muted,#7fa83a)}"
+    }
+  ],
+  "narrative": {
+    "northStar": "The Phosphor Packet Deck",
+    "overview": "The whole page is the screen of a green-phosphor CRT fed by a VHS deck. One hue carries everything; hierarchy is brightness and halftone dot density, never a second color. A single dot-matrix packet sits in a fixed stage and gains one slab per section, one per TCP/IP layer (Aplicacion, Transporte, Red, Enlace, Fisica), brightening as it lands. Scroll is the cable: Lenis smoothing writes progress into CSS custom properties and everything on the stage reads them.",
+    "keyCharacteristics": [
+      "Monochrome phosphor green on near-black olive; five brightness steps stand in for five layers.",
+      "Pixel faces only: Silkscreen for display, VT323 for everything else.",
+      "Hard square corners on all UI; the only large curve is the monitor bezel.",
+      "Glow and scanlines are the depth system; there are no soft drop shadows.",
+      "Entry is a ritual: PLAY gate (when autoplay is blocked), then a randomized 4 s VHS insert-tape loader."
+    ],
+    "rules": [
+      { "name": "The One Hue Rule", "body": "No second accent color. Importance is a brighter step or a denser dot pattern. The only off-hue color is the faint magenta/cyan text fringe, which is a lens artifact, not a palette member.", "section": "colors" },
+      { "name": "The Ink-On-Glow Rule", "body": "Solid phosphor fills always take on-phosphor text with text-shadow removed.", "section": "colors" },
+      { "name": "The Pixel Face Rule", "body": "Only Silkscreen and VT323. Font smoothing is turned off so edges stay crisp.", "section": "typography" },
+      { "name": "The Glow Rule", "body": "Body text carries a three-part text-shadow (red fringe, cyan fringe, 8px green glow). Headings add a stepped offset shadow whose horizontal split scales with scroll speed. Text on solid fills drops it.", "section": "typography" },
+      { "name": "The Emits-Light Rule", "body": "Elevation means luminance. Raise importance by brightening and haloing, not by adding gray shadow.", "section": "elevation" }
+    ],
+    "dos": [
+      "Do express hierarchy with the five phosphor steps and halftone density; the brightest step marks the final layer and focus.",
+      "Do put on-phosphor (#0a1205) text on every solid phosphor fill.",
+      "Do keep all corners square (0 radius) except the bezel.",
+      "Do use the dashed 3px phosphor-5 focus ring (4px offset) on every interactive element.",
+      "Do use steps() easing for any glitch, tape, press or stamp motion.",
+      "Do draw controls (play, pause, meters) in CSS shapes; keep Silkscreen and VT323 as the only faces.",
+      "Do honor prefers-reduced-motion by disabling every looped or launched animation."
+    ],
+    "donts": [
+      "Don't add a second hue or a gray; step brightness instead.",
+      "Don't use soft gray drop shadows, rounded cards, or gradients as decoration; depth is glow, scanline and vignette.",
+      "Don't use system or serif faces, or icon fonts and emoji glyphs.",
+      "Don't let section copy sit on the stage side; text stays in the left column (full width, beneath the packet window, at 820px and below).",
+      "Don't drop the five-layer packet structure or the VHS/CRT skin; they are binding commitments."
+    ]
+  }
+}

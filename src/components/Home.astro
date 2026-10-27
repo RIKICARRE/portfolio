@@ -1,0 +1,1209 @@
+---
+import '@fontsource/vt323';
+import '@fontsource/silkscreen/400.css';
+import '@fontsource/silkscreen/700.css';
+import 'lenis/dist/lenis.css';
+import '../styles/global.css';
+import { content, type Lang } from '../content';
+import CvMenu from './CvMenu.astro';
+
+interface Props {
+  lang: Lang;
+}
+const { lang } = Astro.props;
+const t = content[lang];
+const navItems = [
+  { id: 'learning', label: t.keys[0].label },
+  { id: 'projects', label: t.keys[1].label },
+  { id: 'experience', label: t.keys[2].label },
+  { id: 'contact', label: t.keys[3].label },
+];
+const tones = ['p1', 'p2', 'p3', 'p4', 'p5'];
+const origin = Astro.url.origin;
+
+// datos que la consola imprime como JSON (sin los campos internos)
+const strip = <T extends { seed?: string }>({ seed, ...rest }: T) => rest;
+const norm = (s: string) => s.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase();
+const termPayload = {
+  sections: {
+    learning: { degrees: t.learning.degrees.map(strip), courses: t.learning.courses.map(strip) },
+    projects: t.projects.items.map(strip),
+    experience: t.experience.items.map(strip),
+    contact: t.contact.links,
+  },
+  cmds: Object.fromEntries(t.keys.map((k) => [norm(k.label), k.id])),
+  cvs: t.cv.options,
+  texts: t.off.term,
+};
+---
+
+<!doctype html>
+<html lang={t.htmlLang}>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{t.title}</title>
+    <meta name="description" content={t.description} />
+    <meta name="theme-color" content="#070c05" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <script is:inline>
+      (function () {
+        try {
+          // modos secretos (naranja con admin, rojo con superadmin) mientras dure la sesión
+          var tone = sessionStorage.getItem('tone');
+          if (tone === 'amber' || tone === 'red') document.documentElement.dataset.tone = tone;
+          var reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+          var nav = performance.getEntriesByType('navigation')[0];
+          var internal = document.referrer && new URL(document.referrer).origin === location.origin && (!nav || nav.type !== 'reload');
+          // ?gate fuerza la pantalla de PLAY, también al volver con el comando "start"
+          if (!reduce && (!internal || location.search.indexOf('gate') > -1)) {
+            var root = document.documentElement;
+            root.classList.add('has-loader');
+            var allowed = navigator.getAutoplayPolicy && navigator.getAutoplayPolicy('mediaelement') === 'allowed';
+            if (!allowed || location.search.indexOf('gate') > -1) root.classList.add('has-gate');
+          }
+        } catch (e) {}
+      })();
+    </script>
+    <link rel="alternate" hreflang="es" href={`${origin}/`} />
+    <link rel="alternate" hreflang="en" href={`${origin}/en/`} />
+    <link rel="alternate" hreflang="x-default" href={`${origin}/`} />
+  </head>
+  <body>
+    <a class="skip" href="#top">{t.skip}</a>
+
+
+    <canvas class="backdrop" aria-hidden="true"></canvas>
+
+    <nav class="pill" aria-label={t.keysLabel}>
+      <a class="brand" href="#top" aria-label={t.name}>R_</a>
+      <ul>
+        {navItems.map((n, i) => (
+          <li><a href={`#${n.id}`} data-nav={i + 1}>{n.label}</a></li>
+        ))}
+      </ul>
+      <a
+        class="lang"
+        href={t.switchTo.href}
+        hreflang={t.switchTo.code.toLowerCase()}
+        lang={t.switchTo.code.toLowerCase()}
+        aria-label={`${t.switchLabel}: ${t.switchTo.name}`}
+      >{t.switchTo.code}</a>
+      <CvMenu id="cv-nav" cls="btn-sm" label={t.cv.label} options={t.cv.options} />
+    </nav>
+
+    <div class="osd">
+      <div class="osd-left">
+        <button
+          class="osd-play"
+          type="button"
+          aria-label={t.audio.play}
+          data-label-play={t.audio.play}
+          data-label-pause={t.audio.pause}
+        >
+          <i aria-hidden="true"></i><span data-play-label aria-hidden="true">PLAY</span>
+        </button>
+        <label class="vol">
+          <span class="vol-name">VOL</span>
+          <input type="range" min="0" max="10" step="1" value="2" aria-label={t.audio.volume} data-vol-input />
+          <output data-vol-out>30</output>
+        </label>
+        <span class="now" aria-hidden="true">{t.audio.track} 01 · Karl Casey @ White Bat Audio</span>
+      </div>
+      <span class="osd-time" aria-hidden="true">SP <b data-tape>00:00:00</b></span>
+    </div>
+
+    <div class="stage" aria-hidden="true">
+      <div class="scene">
+        <div class="float">
+         <div class="fly">
+          <div class="world">
+            {[4, 3, 2, 1, 0].map((i) => (
+              <div
+                class:list={['slab', { 'slab-core': i === 0 }]}
+                style={`--i:${i};--v:${i === 0 ? 1 : `var(--v${i})`};--a:var(--a${i});--c:var(--${tones[i]})`}
+              >
+                <span class="ruler"></span>
+                {i === 0 && <span class="core-name">{t.name}</span>}
+                <span class="band">{t.layerWord} {t.slabs[i].n} · {t.slabs[i].name} │ {t.slabs[i].fields}</span>
+              </div>
+            ))}
+            <div class="ping"></div>
+          </div>
+         </div>
+        </div>
+        <ul class="legend" aria-hidden="true">
+          {[0, 1, 2, 3, 4].map((i) => (
+            <li style={`--v:${i === 0 ? 1 : `var(--v${i})`};--a:var(--a${i});--c:var(--${tones[i]})`}>
+              <i></i><span>{t.quips[i].title}</span><small><b>{t.slabs[i].name}</b>{t.quips[i].sub}</small>
+            </li>
+          ))}
+        </ul>
+        <div class="streaks" aria-hidden="true"><span></span><span></span><span></span><span></span><span></span></div>
+        <div class="rings" aria-hidden="true"><span></span><span></span><span></span></div>
+        <p class="bits" aria-hidden="true"><span>01001000 01101111 01101100 01100001 00100000 01110010 01100101 01100011 01101100 01110101 01110100 01100001 01100100 01101111 01110010 00100001 &nbsp;</span><span>01001000 01101111 01101100 01100001 00100000 01110010 01100101 01100011 01101100 01110101 01110100 01100001 01100100 01101111 01110010 00100001 &nbsp;</span></p>
+        <div class="stamp"><b>{t.stamp}</b><span>{t.ack}</span><small data-now>--/--/---- --:--:--</small></div>
+      </div>
+    </div>
+
+    <main>
+      <section class="s hero" id="top" data-layer="0" style="--c:var(--p1)">
+        <div class="s-inner">
+          <h1>{t.fullName}</h1>
+          <p class="role">{t.role}</p>
+          <p class="lede">{t.intro}</p>
+          <div class="actions">
+            <CvMenu id="cv-hero" label={t.cv.label} options={t.cv.options} />
+            <a class="link" href="#projects">{t.seeProjects}</a>
+          </div>
+        </div>
+      </section>
+
+      <section class="s" id="learning" data-layer="1" aria-labelledby="h-learning" style="--c:var(--p2)">
+        <div class="s-inner">
+          <h2 id="h-learning">{t.learning.heading}</h2>
+          <ol class="degrees">
+            {t.learning.degrees.map((d) => (
+              <li class:list={['degree', { 'degree-now': d.current }]}>
+                <p class="degree-tag">
+                  {d.current && <span class="live">{t.inProgress}</span>}
+                  <span>{d.date}</span>
+                </p>
+                <div class="degree-body">
+                  <h3>{d.title}</h3>
+                  <p class="org">{d.org}</p>
+                  {d.detail && <p class="degree-detail">{d.detail}</p>}
+                </div>
+              </li>
+            ))}
+          </ol>
+          <h3 class="sub">{t.learning.coursesHeading}</h3>
+          <ol class="rows rows-sm">
+            {t.learning.courses.map((it) => (
+              <li class="row">
+                <div>
+                  <h3>{it.title}</h3>
+                  <p class="org">{it.org}</p>
+                </div>
+                <p class="date">{it.date}</p>
+              </li>
+            ))}
+          </ol>
+        </div>
+      </section>
+
+      <section class="s" id="projects" data-layer="2" aria-labelledby="h-projects" style="--c:var(--p3)">
+        <div class="s-inner">
+          <h2 id="h-projects">{t.projects.heading}</h2>
+          <div class="projects">
+            {t.projects.items.map((p) => (
+              <article class="project">
+                <h3>{p.title}</h3>
+                <p class="p-sum">{p.summary}</p>
+                <p>{p.detail}</p>
+                {p.stack && <p class="stack"><span>{t.projects.stackLabel}</span>{p.stack}</p>}
+                <a class="link" href={p.href}>{p.linkLabel}</a>
+              </article>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      <section class="s" id="experience" data-layer="3" aria-labelledby="h-experience" style="--c:var(--p4)">
+        <div class="s-inner">
+          <h2 id="h-experience">{t.experience.heading}</h2>
+          <ol class="rows">
+            {t.experience.items.map((it) => (
+              <li class="row">
+                <div>
+                  <h3>{it.title}</h3>
+                  <p class="org">{it.org}</p>
+                  {it.detail && <p class="row-detail">{it.detail}</p>}
+                </div>
+                <p class="date">{it.date}</p>
+              </li>
+            ))}
+          </ol>
+        </div>
+      </section>
+
+      <section class="s contact" id="contact" data-layer="4" aria-labelledby="h-contact" style="--c:var(--p5)">
+        <div class="s-inner">
+          <h2 id="h-contact">{t.contact.heading}</h2>
+          <p class="section-lead">{t.contact.lead}</p>
+          <dl class="links">
+            {t.contact.links.map((l) => (
+              <div>
+                <dt>{l.label}</dt>
+                <dd><a class="link" href={l.href}>{l.value}</a></dd>
+              </div>
+            ))}
+          </dl>
+          <CvMenu id="cv-contact" cls="btn-lg" label={t.cv.label} options={t.cv.options} />
+          <p class="foot">{t.credit}</p>
+        </div>
+      </section>
+    </main>
+
+    <div class="scrim scrim-top" aria-hidden="true"></div>
+    <div class="scrim scrim-bottom" aria-hidden="true"></div>
+    <div class="track" aria-hidden="true"></div>
+    <div class="crt" aria-hidden="true"></div>
+    <div class="vhs-foot" aria-hidden="true"></div>
+    <div class="bezel" aria-hidden="true"></div>
+    <button class="gate" type="button" aria-label={t.gate.label}>
+      <span class="gate-noise"></span>
+      <span class="gate-roll"></span>
+      <i class="tear"></i>
+      <span class="gate-play"><i aria-hidden="true"></i>PLAY</span>
+      <span class="gate-foot"></span>
+    </button>
+    <div class="loader" aria-hidden="true">
+      <div class="loader-noise"></div>
+      <div class="loader-bars"></div>
+      <i class="tear"></i>
+      <div class="loader-osd">
+        <div class="ld-row ld-top"><span class="ld-play">PLAY</span><span class="ld-clock is-blinking" data-ld-clock>--:--</span></div>
+        <div class="ld-row ld-bottom"><span class="ld-slp">SLP</span><span class="ld-time" data-ld-time>0:00:00</span></div>
+      </div>
+    </div>
+    <div class="boot" aria-hidden="true"></div>
+
+    <div class="off-dim" aria-hidden="true"></div>
+    <div class="off" data-off data-stop={t.off.stop}>
+      <button class="off-power" type="button" aria-label={t.off.power} data-off-power>
+        <svg viewBox="0 0 48 48" width="96" height="96" aria-hidden="true" focusable="false">
+          <path d="M24 5v21M13.7 15.7a16 16 0 1 0 20.6 0" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round" />
+        </svg>
+      </button>
+      <dialog class="off-dialog" aria-labelledby="off-ask" data-off-dialog>
+        <p id="off-ask">{t.off.ask}</p>
+        <div class="off-actions">
+          <button type="button" class="off-btn" data-off-yes>{t.off.yes}</button>
+          <button type="button" class="off-btn off-btn-ghost" data-off-no autofocus>{t.off.no}</button>
+        </div>
+      </dialog>
+      <p class="off-boot" role="status" data-off-boot><span data-boot-text></span><span class="off-dots" data-boot-dots></span></p>
+      <div class="off-console" data-off-console>
+        <div class="term-out" role="log" aria-live="polite" data-term-out></div>
+        <label class="term-line">
+          <span class="off-prompt" aria-hidden="true" data-term-prompt>$</span>
+          <span class="term-text" aria-hidden="true" data-term-text></span><span class="off-cursor" aria-hidden="true"></span>
+          <input
+            class="term-input"
+            type="text"
+            aria-label={t.off.console}
+            autocomplete="off"
+            autocapitalize="off"
+            autocorrect="off"
+            spellcheck="false"
+            enterkeyhint="send"
+            data-term-input
+          />
+        </label>
+      </div>
+      <script type="application/json" id="term-data" is:inline set:html={JSON.stringify(termPayload)} />
+    </div>
+
+    <script>
+      import Lenis from 'lenis';
+      import { startBackdrop } from '../scripts/backdrop';
+
+      const root = document.documentElement;
+      const stage = document.querySelector<HTMLElement>('.stage')!;
+      const track = document.querySelector<HTMLElement>('.track')!;
+      const tape = document.querySelector<HTMLElement>('[data-tape]');
+      const boot = document.querySelector<HTMLElement>('.boot');
+      const secs = [...document.querySelectorAll<HTMLElement>('[data-layer]')];
+      const navLinks = [...document.querySelectorAll<HTMLElement>('[data-nav]')];
+      const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+      const clamp = (x: number, a = 0, b = 1) => Math.min(b, Math.max(a, x));
+      const ease = (t: number) => t * t * (3 - 2 * t);
+      const pad = (n: number) => String(Math.floor(n)).padStart(2, '0');
+
+      let mx = 0, my = 0, tx = 0, ty = 0;
+      let lenis: Lenis | null = null;
+      let pull = 0;
+      let lastY = scrollY;
+      let glitch = 0;
+
+      function update() {
+        const vh = innerHeight;
+        const mid = vh / 2;
+        let f = 0;
+        let current = 0;
+        const rects = secs.map((el) => el.getBoundingClientRect());
+        secs.forEach((el, i) => {
+          const r = rects[i];
+          const v = i === 0 ? 1 : ease(clamp((vh * 0.9 - r.top) / (vh * 0.6)));
+          const dist = r.top > mid ? r.top - mid : r.bottom < mid ? mid - r.bottom : 0;
+          const a = ease(clamp(1 - dist / (vh * 0.55)));
+          if (dist === 0) current = i;
+          el.style.setProperty('--a', a.toFixed(3));
+          stage.style.setProperty(`--v${i}`, v.toFixed(3));
+          stage.style.setProperty(`--a${i}`, a.toFixed(3));
+          if (i >= 1) f += v;
+          stage.style.setProperty(`--l${i}`, (i === 0 ? 0 : Math.sin(Math.PI * clamp((v - 0.5) / 0.5))).toFixed(3));
+        });
+        stage.style.setProperty('--f', f.toFixed(3));
+        const s = parseFloat(stage.style.getPropertyValue('--v4') || '0');
+        stage.style.setProperty('--s', s.toFixed(3));
+        const sentNow = s > 0.7;
+        if (sentNow && !stage.classList.contains('is-sent')) stampNow();
+        stage.classList.toggle('is-sent', sentNow);
+        navLinks.forEach((l) => {
+          if (Number(l.dataset.nav) === current) l.setAttribute('aria-current', 'true');
+          else l.removeAttribute('aria-current');
+        });
+
+        const max = Math.max(1, root.scrollHeight - innerHeight);
+        const secsTotal = (scrollY / max) * 5400;
+        if (tape) tape.textContent = `${pad(secsTotal / 3600)}:${pad((secsTotal % 3600) / 60)}:${pad(secsTotal % 60)}`;
+      }
+
+      const nowEl = document.querySelector<HTMLElement>('[data-now]');
+      const locale = document.documentElement.lang === 'en' ? 'en-GB' : 'es-ES';
+      const fmtDate = new Intl.DateTimeFormat(locale, { day: '2-digit', month: '2-digit', year: 'numeric' });
+      const fmtTime = new Intl.DateTimeFormat(locale, { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false });
+      const stampNow = () => {
+        const d = new Date();
+        if (nowEl) nowEl.textContent = fmtDate.format(d) + ' · ' + fmtTime.format(d);
+      };
+
+      update();
+      addEventListener('resize', update);
+
+      startBackdrop(document.querySelector<HTMLCanvasElement>('.backdrop')!, reduce);
+
+      // ---------- Música de fondo ----------
+      const SONG_OGG = '/audio/extraterrestrial-sphere.ogg';
+      const SONG_M4A = '/audio/extraterrestrial-sphere.m4a';
+      const songSrc = () =>
+        document.createElement('audio').canPlayType('audio/ogg; codecs=vorbis') ? SONG_OGG : SONG_M4A;
+      const playBtn = document.querySelector<HTMLButtonElement>('.osd-play');
+      const playLabel = document.querySelector<HTMLElement>('[data-play-label]');
+      const volInput = document.querySelector<HTMLInputElement>('[data-vol-input]');
+      const volOut = document.querySelector<HTMLElement>('[data-vol-out]');
+      let audio: HTMLAudioElement | null = null;
+      let fade = 0;
+      let isOn = false;
+      let starting = false;
+      let userPaused = false;
+
+      const store = {
+        get: (k: string) => {
+          try {
+            return sessionStorage.getItem(k);
+          } catch {
+            return null;
+          }
+        },
+        set: (k: string, v: string) => {
+          try {
+            sessionStorage.setItem(k, v);
+          } catch {}
+        },
+      };
+
+      // Mientras dura el loader, la barra, el OSD y el contenido no deben recibir foco.
+      const inertEls = ['.pill', '.osd', 'main'].map((s) => document.querySelector<HTMLElement>(s));
+      if (root.classList.contains('has-loader')) inertEls.forEach((e) => e?.setAttribute('inert', ''));
+      const release = () => inertEls.forEach((e) => e?.removeAttribute('inert'));
+
+      // Al cambiar de idioma (sin loader) se recupera dónde iba la canción y si estaba pausada.
+      const carry = !root.classList.contains('has-loader') && store.get('music-time') !== null;
+      const carryTime = carry ? Number(store.get('music-time')) || 0 : 0;
+      if (carry && store.get('music-paused') === '1') userPaused = true;
+      addEventListener('pagehide', () => {
+        store.set('music-paused', userPaused ? '1' : '0');
+        store.set('music-time', String(audio?.currentTime ?? carryTime));
+      });
+
+      let level = 2;
+      try {
+        const saved = localStorage.getItem('vol');
+        if (saved !== null && !Number.isNaN(Number(saved))) level = clamp(Math.round(Number(saved)), 0, 10);
+      } catch {}
+
+      const paintVol = () => {
+        if (!volInput || !volOut) return;
+        volInput.value = String(level);
+        volInput.style.setProperty('--vol', String(level));
+        volInput.setAttribute('aria-valuetext', level * 10 + '%');
+        volOut.textContent = String(level * 10).padStart(2, '0');
+      };
+      paintVol();
+
+      const ramp = (to: number, ms: number, done?: () => void) => {
+        if (!audio) return;
+        cancelAnimationFrame(fade);
+        const a = audio;
+        const from = a.volume;
+        const t0 = performance.now();
+        const step = (now: number) => {
+          const k = clamp((now - t0) / ms);
+          a.volume = from + (to - from) * k;
+          if (k < 1) fade = requestAnimationFrame(step);
+          else done?.();
+        };
+        fade = requestAnimationFrame(step);
+      };
+
+      const setPlaying = (on: boolean) => {
+        isOn = on;
+        playBtn?.classList.toggle('is-playing', on);
+        playBtn?.setAttribute('aria-label', (on ? playBtn.dataset.labelPause : playBtn.dataset.labelPlay) ?? '');
+        if (playLabel) playLabel.textContent = on ? 'PAUSE' : 'PLAY';
+        document.body.classList.toggle('is-audio', on);
+      };
+
+      const ensureAudio = () => {
+        if (!audio) {
+          const a = new Audio(songSrc());
+          a.loop = true;
+          a.preload = 'auto';
+          a.volume = 0;
+          if (carryTime > 0) {
+            a.addEventListener('loadedmetadata', () => {
+              if (a.duration > 0) a.currentTime = carryTime % a.duration;
+            });
+          }
+          audio = a;
+        }
+        return audio;
+      };
+
+      // Se llama dentro de un gesto del visitante (clic en la pantalla de entrada): la
+      // canción arranca a volumen 0 para quedar desbloqueada (iOS) y sube cuando acaba el loader.
+      const primeAudio = () => {
+        const a = ensureAudio();
+        a.volume = 0;
+        a.play().catch(() => {});
+      };
+
+      const startAudio = async () => {
+        if (starting) return isOn;
+        starting = true;
+        const a = ensureAudio();
+        try {
+          if (a.paused) await a.play();
+          setPlaying(true);
+          ramp(level / 10, 900);
+          return true;
+        } catch {
+          setPlaying(false);
+          return false;
+        } finally {
+          starting = false;
+        }
+      };
+
+      playBtn?.addEventListener('click', () => {
+        if (isOn) {
+          userPaused = true;
+          setPlaying(false);
+          ramp(0, 450, () => {
+            if (!isOn) audio?.pause();
+          });
+        } else {
+          userPaused = false;
+          disarm();
+          startAudio();
+        }
+      });
+
+      // Reproducir por defecto: si el navegador bloquea el audio automático, arranca con
+      // el primer gesto del visitante (salvo que ya haya pausado). Si falla, se vuelve a intentar.
+      const gestures = ['pointerdown', 'keydown', 'touchend'];
+      function arm(e: Event) {
+        if (userPaused || (e.target as Element | null)?.closest?.('.osd-play')) return;
+        startAudio().then((ok) => {
+          if (ok) disarm();
+        });
+      }
+      function disarm() {
+        gestures.forEach((g) => removeEventListener(g, arm));
+      }
+      const startMusic = () => {
+        if (userPaused) return Promise.resolve();
+        return startAudio().then((ok) => {
+          if (!ok) gestures.forEach((g) => addEventListener(g, arm));
+        });
+      };
+
+      // ---------- Loader: "insertar la cinta" (dura 4 s, distinto en cada carga) ----------
+      const LOADER_MS = 4000;
+      const loader = document.querySelector<HTMLElement>('.loader');
+      const gate = document.querySelector<HTMLElement>('.gate');
+      // copia limpia del loader para reutilizar el efecto al apagar (antes de que se llene de barras)
+      const loaderTpl = loader ? (loader.cloneNode(true) as HTMLElement) : null;
+      const rnd = (a: number, b: number) => a + Math.random() * (b - a);
+
+      // tirones de cinta al azar: desplazamiento, inclinación y una línea de desajuste.
+      // gap(t) decide la pausa hasta el siguiente tirón según el tiempo transcurrido.
+      const startGlitches = (el: HTMLElement, gap: (t: number) => number, maxMs = 180) => {
+        const t0 = performance.now();
+        let alive = true;
+        let timer = 0;
+        const burst = () => {
+          if (!alive) return;
+          const tear = el.querySelector<HTMLElement>(':scope > .tear');
+          el.style.setProperty('--gx', rnd(-3.5, 3.5).toFixed(2) + '%');
+          el.style.setProperty('--gy', rnd(-2, 2).toFixed(2) + '%');
+          el.style.setProperty('--gsk', rnd(-5, 5).toFixed(2) + 'deg');
+          el.style.setProperty('--jx', rnd(-14, 14).toFixed(0) + 'px');
+          el.style.setProperty('--jy', rnd(-6, 6).toFixed(0) + 'px');
+          tear?.style.setProperty('--ty', rnd(2, 92).toFixed(0) + '%');
+          tear?.style.setProperty('--th', rnd(1.5, 13).toFixed(1) + 'vh');
+          tear?.style.setProperty('--tx', rnd(-7, 7).toFixed(1) + '%');
+          el.classList.add('is-glitch');
+          timer = window.setTimeout(() => {
+            el.classList.remove('is-glitch');
+            // a veces el tirón viene doble
+            const next = Math.random() < 0.3 ? rnd(40, 110) : gap(performance.now() - t0);
+            timer = window.setTimeout(burst, next);
+          }, rnd(35, maxMs));
+        };
+        timer = window.setTimeout(burst, rnd(60, 380));
+        return () => {
+          alive = false;
+          clearTimeout(timer);
+          el.classList.remove('is-glitch');
+        };
+      };
+
+      const gateEl = gate;
+      const stopGateGlitches = gateEl ? startGlitches(gateEl, () => rnd(500, 3200), 230) : () => {};
+
+      const runLoader = (loader: HTMLElement, usedGate = false) => {
+        stopGateGlitches();
+        setTimeout(() => boot?.remove(), 1800);
+
+        // barras de seguimiento generadas al azar en cada carga
+        const bars = loader.querySelector<HTMLElement>('.loader-bars');
+        if (bars) {
+          bars.style.setProperty('--bars-dur', rnd(1.2, 2.6).toFixed(2) + 's');
+          const n = Math.floor(rnd(4, 9));
+          for (let i = 0; i < n; i++) {
+            const bar = document.createElement('i');
+            const dark = Math.random() < 0.35;
+            bar.style.height = rnd(2, 15).toFixed(1) + 'vh';
+            bar.style.background = dark ? 'rgb(0 0 0 / ' + rnd(0.2, 0.45).toFixed(2) + ')' : 'rgb(233 255 168 / ' + rnd(0.1, 0.38).toFixed(2) + ')';
+            bar.style.setProperty('--bd', rnd(0.35, 1.5).toFixed(2) + 's');
+            bar.style.setProperty('--bs', String(Math.floor(rnd(5, 15))));
+            bar.style.animationDelay = '-' + rnd(0, 1.4).toFixed(2) + 's';
+            bars.appendChild(bar);
+          }
+        }
+        loader.querySelector<HTMLElement>('.loader-noise')?.style.setProperty('--noise-dur', rnd(0.9, 1.9).toFixed(2) + 's');
+
+        // el texto de pantalla aparece parpadeando de forma irregular
+        const osd = loader.querySelector<HTMLElement>('.loader-osd');
+        if (osd) {
+          let at = rnd(650, 1150);
+          let on = true;
+          const flips = Math.floor(rnd(3, 7));
+          for (let i = 0; i < flips; i++) {
+            setTimeout(() => osd.classList.toggle('is-on', on), at);
+            on = !on;
+            at += rnd(40, 190);
+          }
+          setTimeout(() => osd.classList.add('is-on'), at + 40);
+        }
+
+        // contador y reloj, con ligera irregularidad
+        const tEl = document.querySelector<HTMLElement>('[data-ld-time]');
+        const cEl = document.querySelector<HTMLElement>('[data-ld-clock]');
+        [1900, 2900, 3900].forEach((ms, i) =>
+          setTimeout(() => {
+            if (tEl) tEl.textContent = '0:00:0' + (i + 1);
+          }, ms + rnd(-160, 160)),
+        );
+        setTimeout(() => {
+          if (!cEl) return;
+          const d = new Date();
+          cEl.textContent = pad(d.getHours()) + ':' + pad(d.getMinutes());
+          cEl.classList.remove('is-blinking');
+        }, rnd(1700, 2800));
+
+        // más tirones al principio y al final, más calma en medio
+        const stopGlitches = startGlitches(loader, (t) => (t < 1300 || t > 3000 ? rnd(70, 330) : rnd(380, 1200)));
+        setTimeout(() => loader.classList.add('is-out'), LOADER_MS - 620);
+
+        // efecto de sonido: se intenta nada más empezar el loader. Si el navegador lo
+        // bloquea (no hay interacción previa), suena con el primer gesto mientras dure el loader.
+        const probe = document.createElement('audio');
+        const sfxSrc = probe.canPlayType('audio/ogg; codecs=opus') ? '/audio/vhs-load.opus' : '/audio/vhs-load.m4a';
+        const sfx = new Audio(sfxSrc);
+        sfx.preload = 'auto';
+        sfx.volume = 0.6;
+        const t0 = performance.now();
+        const sfxGestures = ['pointerdown', 'keydown', 'touchend'];
+        const playSfx = () => sfx.play().then(() => true).catch(() => false);
+        const onSfxGesture = () => {
+          sfxGestures.forEach((g) => removeEventListener(g, onSfxGesture));
+          if (performance.now() - t0 < LOADER_MS - 400) playSfx();
+        };
+        playSfx().then((ok) => {
+          if (!ok) sfxGestures.forEach((g) => addEventListener(g, onSfxGesture));
+        });
+        // el efecto dura más de 4 s: se apaga en fundido para que acabe con el loader
+        setTimeout(() => {
+          const v0 = sfx.volume;
+          const t1 = performance.now();
+          const fadeOut = (now: number) => {
+            const k = clamp((now - t1) / 380);
+            sfx.volume = v0 * (1 - k);
+            if (k < 1) requestAnimationFrame(fadeOut);
+            else sfx.pause();
+          };
+          requestAnimationFrame(fadeOut);
+        }, LOADER_MS - 400);
+
+        setTimeout(() => {
+          stopGlitches();
+          sfxGestures.forEach((g) => removeEventListener(g, onSfxGesture));
+          loader.remove();
+          root.classList.add('loaded');
+          release();
+          if (usedGate) playBtn?.focus({ preventScroll: true });
+          startMusic();
+        }, LOADER_MS);
+      };
+
+      if (root.classList.contains('has-loader') && loader) {
+        if (root.classList.contains('has-gate') && gate) {
+          gate.focus({ preventScroll: true });
+          gate.addEventListener('click', () => {
+            stopGateGlitches();
+            primeAudio();
+            gate.remove();
+            root.classList.remove('has-gate');
+            runLoader(loader, true);
+          });
+        } else {
+          stopGateGlitches();
+          gate?.remove();
+          runLoader(loader);
+        }
+      } else {
+        stopGateGlitches();
+        gate?.remove();
+        setTimeout(() => boot?.remove(), 1800);
+        root.classList.add('loaded');
+        release();
+        startMusic();
+      }
+
+      volInput?.addEventListener('input', () => {
+        level = clamp(Number(volInput.value), 0, 10);
+        paintVol();
+        try {
+          localStorage.setItem('vol', String(level));
+        } catch {}
+        if (audio && isOn) {
+          cancelAnimationFrame(fade);
+          audio.volume = level / 10;
+        }
+      });
+
+      // ---------- Easter egg: al pasar del final se apaga el sistema ----------
+      const off = document.querySelector<HTMLElement>('[data-off]')!;
+      const offDim = document.querySelector<HTMLElement>('.off-dim')!;
+      const offPower = off.querySelector<HTMLButtonElement>('[data-off-power]')!;
+      const offDialog = off.querySelector<HTMLDialogElement>('[data-off-dialog]')!;
+      const offYes = off.querySelector<HTMLButtonElement>('[data-off-yes]')!;
+      const offNo = off.querySelector<HTMLButtonElement>('[data-off-no]')!;
+      const PULL_NEED = 900;
+      let offState: 'idle' | 'off' | 'shutting' | 'console' = 'idle';
+      let bottomSince = 0;
+      let lastPullAt = 0;
+
+      const inertAll = () => [...inertEls, document.querySelector<HTMLElement>('.skip')];
+      const atBottom = () => scrollY >= Math.max(0, root.scrollHeight - innerHeight) - 2;
+      const setPull = (v: number) => {
+        pull = clamp(v);
+        offDim.style.opacity = String((pull * 0.62).toFixed(3));
+      };
+
+      // sólo cuenta el empuje deliberado: la inercia con la que se llega al final no suma
+      const canPull = () => {
+        if (offState !== 'idle') return false;
+        if (root.classList.contains('has-loader') && !root.classList.contains('loaded')) return false;
+        if (!atBottom()) {
+          bottomSince = 0;
+          return false;
+        }
+        const now = performance.now();
+        if (!bottomSince) bottomSince = now;
+        return now - bottomSince > 550;
+      };
+      const addPull = (amount: number) => {
+        if (!canPull()) return;
+        lastPullAt = performance.now();
+        setPull(pull + amount / PULL_NEED);
+        if (pull >= 1) enterOff();
+      };
+      // si se deja de empujar, la pantalla vuelve poco a poco
+      const pullDecay = () => {
+        if (offState === 'idle' && pull > 0 && performance.now() - lastPullAt > 420) setPull(pull - 0.012);
+        requestAnimationFrame(pullDecay);
+      };
+      requestAnimationFrame(pullDecay);
+
+      addEventListener(
+        'wheel',
+        (e) => {
+          if (offState === 'off' && !offDialog.open && e.deltaY < -40) leaveOff();
+          else if (e.deltaY > 0) addPull(e.deltaY);
+        },
+        { passive: true },
+      );
+      let touchY = 0;
+      addEventListener('touchstart', (e) => (touchY = e.touches[0].clientY), { passive: true });
+      addEventListener(
+        'touchmove',
+        (e) => {
+          const y = e.touches[0].clientY;
+          const dy = touchY - y;
+          touchY = y;
+          if (offState === 'off' && !offDialog.open && dy < -14) leaveOff();
+          else if (dy > 0) addPull(dy * 2.4);
+        },
+        { passive: true },
+      );
+      addEventListener('keydown', (e) => {
+        if (offState === 'off' && !offDialog.open && ['Escape', 'ArrowUp', 'PageUp', 'Home'].includes(e.key)) leaveOff();
+        else if (['ArrowDown', 'PageDown', 'End', ' '].includes(e.key)) addPull(170);
+      });
+
+      function enterOff() {
+        offState = 'off';
+        setPull(1);
+        // la música se apaga con el efecto de vhs; si ya la había pausado, se respeta
+        if (audio && isOn) {
+          setPlaying(false);
+          ramp(0, 900, () => audio?.pause());
+        }
+        lenis?.stop();
+        root.classList.add('is-off');
+        inertAll().forEach((el) => el?.setAttribute('inert', ''));
+        off.classList.add('is-on');
+        setTimeout(() => {
+          if (offState === 'off') offPower.focus({ preventScroll: true });
+        }, 950);
+      }
+
+      // antes de apagar se puede volver: se desliza en sentido contrario
+      function leaveOff() {
+        if (offState !== 'off') return;
+        offState = 'idle';
+        bottomSince = performance.now();
+        off.classList.remove('is-on');
+        root.classList.remove('is-off');
+        inertAll().forEach((el) => el?.removeAttribute('inert'));
+        lenis?.start();
+        setPull(0);
+        if (!userPaused) startAudio();
+      }
+
+      offPower.addEventListener('click', () => {
+        if (offState === 'off') offDialog.showModal();
+      });
+      offNo.addEventListener('click', () => {
+        offDialog.close();
+        offPower.focus({ preventScroll: true });
+      });
+      offYes.addEventListener('click', () => {
+        offDialog.close();
+        shutDown();
+      });
+
+      // ---------- Consola ----------
+      type TermData = {
+        sections: Record<string, unknown>;
+        cmds: Record<string, string>;
+        cvs: { lang: string; label: string; href: string }[];
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        texts: Record<string, any>;
+      };
+      const termData: TermData = JSON.parse(document.getElementById('term-data')?.textContent || '{}');
+      const term = off.querySelector<HTMLElement>('[data-off-console]')!;
+      const termOut = term.querySelector<HTMLElement>('[data-term-out]')!;
+      const termText = term.querySelector<HTMLElement>('[data-term-text]')!;
+      const termInput = term.querySelector<HTMLInputElement>('[data-term-input]')!;
+      const has = (o: object, k: string) => Object.prototype.hasOwnProperty.call(o, k);
+      const plain = (s: string) => s.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase();
+      const fill = (s: string, v: Record<string, string>) => s.replace(/\{(\w+)\}/g, (_, k) => v[k] ?? '');
+      const termPrompt = term.querySelector<HTMLElement>('[data-term-prompt]')!;
+      // "admin" no figura aquí a propósito: el autocompletado tampoco lo delata
+      const termWords = () => ['start', 'cv', 'help', 'exit', ...Object.keys(termData.cmds ?? {})];
+
+      // contraseña de admin: al principio sin pista; tras el primer intento sale una al azar.
+      // Valen las tres de texto y el código de teclas, diga lo que diga la pista.
+      const HINTS = ['33', 'apple', 'ferran', 'konami'];
+      const PASSWORDS = ['33', 'apple', 'ferran'];
+      const KONAMI = ['LRLRUDABS', 'UUDDLRLRBAS'];
+      const KEYS: Record<string, string> = { ArrowUp: 'U', ArrowDown: 'D', ArrowLeft: 'L', ArrowRight: 'R', a: 'A', A: 'A', b: 'B', B: 'B', ' ': 'S' };
+      const MAX_TRIES = 4;
+      let pw: { tries: number; hinted: boolean; arrows: number } | null = null;
+      let hintSeen = false;
+      let lastHint = '';
+      const history: string[] = [];
+      let hIdx = 0;
+      let exitArmed = false;
+
+      const say = (text: string, cls = '') => {
+        const p = document.createElement('p');
+        p.className = 'term-row' + (cls ? ' ' + cls : '');
+        p.textContent = text;
+        termOut.appendChild(p);
+        term.scrollTop = term.scrollHeight;
+      };
+      // en el modo contraseña la línea no enseña lo que se escribe
+      const setLine = (v: string) => {
+        termInput.value = v;
+        termText.textContent = pw ? '*'.repeat(v.length + pw.arrows) : v;
+        term.scrollTop = term.scrollHeight;
+      };
+      const sayHelp = (rows: [string, string][]) => {
+        const box = document.createElement('div');
+        box.className = 'term-help';
+        rows.forEach(([c, d]) => {
+          const a = document.createElement('span');
+          a.textContent = c;
+          const b = document.createElement('span');
+          b.textContent = d;
+          box.append(a, b);
+        });
+        termOut.appendChild(box);
+        term.scrollTop = term.scrollHeight;
+      };
+
+      const endPw = () => {
+        pw = null;
+        termPrompt.textContent = '$';
+        setLine('');
+      };
+      const revealHint = () => {
+        const touch = matchMedia('(pointer: coarse)').matches;
+        const pool = HINTS.filter((h) => h !== lastHint && !(touch && h === 'konami'));
+        lastHint = pool[Math.floor(Math.random() * pool.length)];
+        say(termData.texts.admin.hints[lastHint]);
+        hintSeen = true;
+        if (pw) pw.hinted = true;
+      };
+      const grantAccess = () => {
+        const tx = termData.texts.admin;
+        endPw();
+        // el mismo código sirve para encender y apagar el modo naranja
+        const on = store.get('tone') !== 'amber';
+        store.set('tone', on ? 'amber' : '');
+        say(on ? tx.ok : tx.off);
+        termInput.disabled = true;
+        setTimeout(() => (location.href = location.pathname + '?gate'), 1600);
+      };
+      const submitPw = (typedRaw: string) => {
+        if (!pw) return;
+        const tx = termData.texts.admin;
+        const typed = plain(typedRaw.trim());
+        say(tx.prompt + ' ' + '*'.repeat(typedRaw.length + pw.arrows), 'is-cmd');
+        if (PASSWORDS.includes(typed)) return grantAccess();
+        pw.tries++;
+        pw.arrows = 0;
+        if (typed === 'admin') say(tx.jokeAdmin, 'is-err');
+        else if (typed === 'contrasena' || typed === 'password') say(tx.jokePass, 'is-err');
+        else say(tx.bad, 'is-err');
+        if (!pw.hinted) {
+          // primer intento fallido: se echa un cable
+          say(tx.pity);
+          revealHint();
+        }
+        if (pw.tries >= MAX_TRIES) {
+          say(tx.tooMany, 'is-err');
+          endPw();
+        } else setLine('');
+      };
+      const pwKey = (e: KeyboardEvent) => {
+        if (!pw) return;
+        if (e.key === 'Escape' || (e.ctrlKey && e.key.toLowerCase() === 'c')) {
+          e.preventDefault();
+          endPw();
+          say(termData.texts.admin.cancel);
+          return;
+        }
+        if (e.key === 'Enter') {
+          e.preventDefault();
+          return submitPw(termInput.value);
+        }
+        if (e.key === 'Tab') return e.preventDefault();
+        // las flechas no escriben nada: se cuentan aparte para que la línea enseñe un asterisco por tecla
+        // (el código de teclas lo recoge el detector global de superadmin)
+        if (e.key.startsWith('Arrow')) {
+          e.preventDefault();
+          pw.arrows++;
+          setLine(termInput.value);
+        }
+      };
+
+      function runCommand(raw: string) {
+        say('$ ' + raw, 'is-cmd');
+        const line = raw.trim();
+        if (!line) return;
+        history.push(line);
+        hIdx = history.length;
+        const [first, ...args] = line.split(/\s+/);
+        const cmd = plain(first);
+        const tx = termData.texts;
+        if (cmd !== 'exit') exitArmed = false;
+
+        if (cmd === 'start') {
+          say(tx.start);
+          termInput.disabled = true;
+          try {
+            sessionStorage.removeItem('music-time');
+            sessionStorage.removeItem('music-paused');
+          } catch {}
+          // mismo idioma, con la pantalla de PLAY como en la primera visita
+          setTimeout(() => (location.href = location.pathname + '?gate'), 700);
+        } else if (cmd === 'cv') {
+          const flag = plain(args[0] ?? '').replace(/^--?/, '');
+          const opt = args[0] ? termData.cvs.find((o) => o.lang === flag) : undefined;
+          if (!args[0]) say(tx.cvMissing, 'is-err');
+          else if (!opt) say(fill(tx.cvBad, { flag: args[0] }), 'is-err');
+          else {
+            say(fill(tx.cvGo, { lang: tx.cvLangs[opt.lang] }));
+            const a = document.createElement('a');
+            a.href = opt.href;
+            a.download = '';
+            a.rel = 'noopener';
+            document.body.appendChild(a);
+            a.click();
+            a.remove();
+          }
+        } else if (cmd === 'exit') {
+          if (!exitArmed) {
+            exitArmed = true;
+            say(tx.exitAgain);
+          } else {
+            say(tx.exitBye);
+            termInput.disabled = true;
+            // los navegadores sólo dejan cerrar pestañas abiertas por script: si no se cierra, queda en blanco
+            setTimeout(() => {
+              window.close();
+              setTimeout(() => location.replace('about:blank'), 250);
+            }, 350);
+          }
+        } else if (cmd === 'help') {
+          const names: Record<string, string> = {};
+          Object.entries(termData.cmds).forEach(([word, id]) => (names[id] = word));
+          sayHelp([
+            ['start', tx.help.start],
+            ['cv -es | -en', tx.help.cv],
+            [names.learning, tx.help.learning],
+            [names.projects, tx.help.projects],
+            [names.experience, tx.help.experience],
+            [names.contact, tx.help.contact],
+            ['help', tx.help.help],
+            ['exit', tx.help.exit],
+          ]);
+          say(tx.helpHint, 'is-hint');
+        } else if (cmd === 'admin') {
+          pw = { tries: 0, hinted: false, arrows: 0 };
+          termPrompt.textContent = tx.admin.prompt;
+          // sin pista la primera vez; si ya la han probado, sale al momento
+          if (hintSeen) revealHint();
+          setLine('');
+        } else if (has(termData.cmds, cmd)) {
+          say(JSON.stringify(termData.sections[termData.cmds[cmd]], null, 2), 'is-json');
+        } else {
+          say(fill(tx.notFound, { cmd: first }), 'is-err');
+        }
+      }
+
+      termInput.addEventListener('input', () => setLine(termInput.value));
+      termInput.addEventListener('keydown', (e) => {
+        if (pw) return pwKey(e);
+        if (e.key === 'Enter') {
+          const v = termInput.value;
+          setLine('');
+          runCommand(v);
+        } else if (e.key === 'ArrowUp' || e.key === 'ArrowDown') {
+          e.preventDefault();
+          hIdx = clamp(hIdx + (e.key === 'ArrowUp' ? -1 : 1), 0, history.length);
+          setLine(history[hIdx] ?? '');
+        } else if (e.key === 'Tab') {
+          e.preventDefault();
+          const typed = plain(termInput.value.trim());
+          const hits = typed ? termWords().filter((w) => w.startsWith(typed)) : [];
+          if (hits.length === 1) setLine(hits[0]);
+        }
+      });
+      // un toque o clic en la pantalla devuelve el foco a la línea de órdenes, sin romper la selección de texto
+      off.addEventListener('click', () => {
+        if (offState === 'console' && getSelection()?.isCollapsed !== false) termInput.focus({ preventScroll: true });
+      });
+
+      // barras y ruido aleatorios, los mismos del loader de entrada
+      function decorateTape(el: HTMLElement) {
+        const bars = el.querySelector<HTMLElement>('.loader-bars');
+        if (bars) {
+          bars.style.setProperty('--bars-dur', rnd(1.2, 2.6).toFixed(2) + 's');
+          const n = Math.floor(rnd(4, 9));
+          for (let i = 0; i < n; i++) {
+            const bar = document.createElement('i');
+            const dark = Math.random() < 0.35;
+            bar.style.height = rnd(2, 15).toFixed(1) + 'vh';
+            bar.style.background = dark ? 'rgb(0 0 0 / ' + rnd(0.2, 0.45).toFixed(2) + ')' : 'rgb(233 255 168 / ' + rnd(0.1, 0.38).toFixed(2) + ')';
+            bar.style.setProperty('--bd', rnd(0.35, 1.5).toFixed(2) + 's');
+            bar.style.setProperty('--bs', String(Math.floor(rnd(5, 15))));
+            bar.style.animationDelay = '-' + rnd(0, 1.4).toFixed(2) + 's';
+            bars.appendChild(bar);
+          }
+        }
+        el.querySelector<HTMLElement>('.loader-noise')?.style.setProperty('--noise-dur', rnd(0.9, 1.9).toFixed(2) + 's');
+      }
+
+      // efecto de apagado: ruido y barras del loader, colapso a una línea y el sonido de la tele.
+      // Se prepara dentro de un gesto del visitante (clic o tecla) para que el navegador deje sonar.
+      function playPowerOff(done: () => void) {
+        const tv = new Audio(
+          document.createElement('audio').canPlayType('audio/ogg; codecs=opus') ? '/audio/tv-off.opus' : '/audio/tv-off.m4a',
+        );
+        tv.preload = 'auto';
+        tv.volume = 0;
+        tv.play()
+          .then(() => {
+            tv.pause();
+            tv.currentTime = 0;
+            tv.volume = 0.7;
+          })
+          .catch(() => {});
+        const bang = () => tv.play().catch(() => {});
+
+        if (reduce || !loaderTpl) {
+          setTimeout(bang, 120);
+          setTimeout(done, 900);
+          return;
+        }
+
+        // el mismo efecto que al pulsar PLAY (ruido, barras, tirones), con STOP en pantalla
+        const COLLAPSE_AT = 1500;
+        const fx = loaderTpl.cloneNode(true) as HTMLElement;
+        fx.classList.add('is-shutdown');
+        const stopWord = fx.querySelector<HTMLElement>('.ld-play');
+        if (stopWord) stopWord.textContent = off.dataset.stop ?? 'STOP';
+        document.body.appendChild(fx);
+        decorateTape(fx);
+        setTimeout(() => fx.querySelector('.loader-osd')?.classList.add('is-on'), 160);
+        const stopGlitches = startGlitches(fx, () => rnd(70, 260));
+        setTimeout(() => {
+          stopGlitches();
+          fx.classList.add('is-collapse');
+          bang();
+        }, COLLAPSE_AT);
+        setTimeout(() => {
+          fx.remove();
+          setTimeout(done, 450);
+        }, COLLAPSE_AT + 700);
+      }
+
+      function shutDown() {
+        if (offState !== 'off') return;
+        offState = 'shutting';
+        off.classList.add('is-shutting');
+        playPowerOff(() => {
+          offState = 'console';
+          off.classList.remove('is-shutting');
+          off.classList.add('is-console');
+          root.classList.add('is-shutdown');
+          termInput.focus({ preventScroll: true });
+        });
+      }
+
+      // ---------- Superadmin: la combinación de teclas funciona en cualquier parte ----------
+      const bootText = off.querySelector<HTMLElement>('[data-boot-text]')!;
+      const bootDots = off.querySelector<HTMLElement>('[data-boot-dots]')!;
+      let superBusy = false;
+      let comboKeys: string[] = [];
+
+      function superAdmin() {
+        if (superBusy || offState === 'shutting') return;
+        superBusy = true;
+        const leaving = store.get('tone') === 'red';
+        const tx = termData.texts.super;
+
+        if (audio && isOn) {
+          setPlaying(false);
+          ramp(0, 600, () => audio?.pause());
+        }
+        lenis?.stop();
+        root.classList.add('is-off');
+        inertAll().forEach((el) => el?.setAttribute('inert', ''));
+        if (offDialog.open) offDialog.close();
+        endPw();
+        termInput.disabled = true;
+        termInput.blur();
+        offState = 'shutting';
+        off.classList.remove('is-console');
+        off.classList.add('is-on', 'is-shutting', 'is-super');
+
+        playPowerOff(() => {
+          bootText.textContent = leaving ? tx.leaving : tx.loading;
+          off.classList.add('is-booting');
+          // un punto, luego dos, luego tres, y a cargar
+          const frames = ['.', '..', '...'];
+          frames.forEach((f, i) => setTimeout(() => (bootDots.textContent = f), 120 + i * 650));
+          setTimeout(() => {
+            store.set('tone', leaving ? '' : 'red');
+            location.href = location.pathname + '?gate';
+          }, 120 + frames.length * 650 + 400);
+        });
+      }
+
+      addEventListener('keydown', (e) => {
+        if (e.repeat || ['Shift', 'Control', 'Alt', 'Meta', 'CapsLock'].includes(e.key)) return;
+        const k = KEYS[e.key];
+        if (!k) {
+          comboKeys = [];
+          return;
+        }
+        comboKeys.push(k);
+        if (comboKeys.length > 12) comboKeys.shift();
+        if (KONAMI.some((c) => comboKeys.join('').endsWith(c))) {
+          comboKeys = [];
+          superAdmin();
+        }
+      });
+
+      if (reduce) {
+        addEventListener('scroll', update, { passive: true });
+      } else {
+        lenis = new Lenis({ lerp: 0.085, anchors: true });
+        lenis.on('scroll', update);
+        const loop = (time: number) => {
+          lenis?.raf(time);
+          mx += (tx - mx) * 0.06;
+          my += (ty - my) * 0.06;
+          stage.style.setProperty('--mx', mx.toFixed(3));
+          stage.style.setProperty('--my', my.toFixed(3));
+          const dy = Math.abs(scrollY - lastY);
+          lastY = scrollY;
+          glitch += (Math.max(clamp(dy / 70), pull * 0.85) - glitch) * 0.12;
+          root.style.setProperty('--g', glitch.toFixed(3));
+          document.body.classList.toggle('warp', glitch > 0.28);
+          track.style.opacity = String(Math.min(0.55, glitch * 0.9));
+          track.style.transform = `translateY(${((time * 0.35) % innerHeight).toFixed(0)}px)`;
+          requestAnimationFrame(loop);
+        };
+        requestAnimationFrame(loop);
+        if (matchMedia('(hover: hover)').matches) {
+          addEventListener('pointermove', (e) => {
+            tx = (e.clientX / innerWidth) * 2 - 1;
+            ty = (e.clientY / innerHeight) * 2 - 1;
+          });
+        }
+      }
+    </script>
+  </body>
+</html>

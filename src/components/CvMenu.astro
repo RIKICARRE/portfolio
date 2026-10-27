@@ -1,0 +1,64 @@
+---
+interface Props {
+  id: string;
+  label: string;
+  cls?: string;
+  options: readonly { lang: string; label: string; href: string }[];
+}
+const { id, label, cls = '', options } = Astro.props;
+---
+
+<div class="cv-pick" data-cv-pick>
+  <button
+    type="button"
+    class:list={['btn btn-cv', cls]}
+    aria-expanded="false"
+    aria-haspopup="true"
+    aria-controls={id}
+  >
+    <span>{label}</span>
+    <svg class="caret" viewBox="0 0 16 16" width="14" height="14" aria-hidden="true" focusable="false"><path d="M7 4h2v2h2v2h2v2h-2V8H9V6H7v2H5v2H3V8h2V6h2z" fill="currentColor"/></svg>
+  </button>
+  <ul class="cv-menu" id={id} hidden>
+    {options.map((o) => (
+      <li>
+        <a href={o.href} download hreflang={o.lang} lang={o.lang}>
+          <span>{o.label}</span><small>PDF</small>
+        </a>
+      </li>
+    ))}
+  </ul>
+</div>
+
+<script>
+  const picks = document.querySelectorAll<HTMLElement>('[data-cv-pick]');
+  const closeAll = (except?: HTMLElement) => {
+    picks.forEach((p) => {
+      if (p === except) return;
+      p.querySelector('button')?.setAttribute('aria-expanded', 'false');
+      p.querySelector<HTMLElement>('.cv-menu')!.hidden = true;
+    });
+  };
+  picks.forEach((p) => {
+    const btn = p.querySelector('button')!;
+    const menu = p.querySelector<HTMLElement>('.cv-menu')!;
+    btn.addEventListener('click', () => {
+      const open = menu.hidden;
+      closeAll(p);
+      menu.hidden = !open;
+      btn.setAttribute('aria-expanded', String(open));
+    });
+    menu.addEventListener('click', (e) => {
+      if ((e.target as Element).closest('a')) closeAll();
+    });
+    p.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && !menu.hidden) {
+        closeAll();
+        btn.focus();
+      }
+    });
+  });
+  document.addEventListener('pointerdown', (e) => {
+    if (!(e.target as Element).closest('[data-cv-pick]')) closeAll();
+  });
+</script>
