@@ -19,7 +19,8 @@ const navItems = [
   { id: 'contact', label: t.keys[3].label },
 ];
 const tones = ['p1', 'p2', 'p3', 'p4', 'p5'];
-const origin = Astro.url.origin;
+const origin = Astro.site!.origin;
+const canonical = `${origin}${lang === 'es' ? '/' : '/en/'}`;
 
 // datos que la consola imprime como JSON (sin los campos internos)
 const strip = <T extends { seed?: string }>({ seed, ...rest }: T) => rest;
@@ -65,6 +66,7 @@ const termPayload = {
         } catch (e) {}
       })();
     </script>
+    <link rel="canonical" href={canonical} />
     <link rel="alternate" hreflang="es" href={`${origin}/`} />
     <link rel="alternate" hreflang="en" href={`${origin}/en/`} />
     <link rel="alternate" hreflang="x-default" href={`${origin}/`} />
