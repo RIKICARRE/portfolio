@@ -364,6 +364,7 @@ const termPayload = {
 
       let mx = 0, my = 0, tx = 0, ty = 0;
       let lenis: Lenis | null = null;
+      let wake: () => void = () => {};
       let pull = 0;
       let lastY = scrollY;
       let glitch = 0;
@@ -762,9 +763,12 @@ const termPayload = {
 
       const inertAll = () => [...inertEls, document.querySelector<HTMLElement>('.skip')];
       const atBottom = () => scrollY >= Math.max(0, root.scrollHeight - innerHeight) - 2;
+      let pullRaf = 0;
       const setPull = (v: number) => {
         pull = clamp(v);
         offDim.style.opacity = String((pull * 0.62).toFixed(3));
+        wake();
+        if (pull > 0 && !pullRaf) pullRaf = requestAnimationFrame(pullDecay);
       };
 
       // sólo cuenta el empuje deliberado: la inercia con la que se llega al final no suma
@@ -786,11 +790,12 @@ const termPayload = {
         if (pull >= 1) enterOff();
       };
       // si se deja de empujar, la pantalla vuelve poco a poco
+      // (sólo corre mientras haya empuje acumulado; setPull lo arranca)
       const pullDecay = () => {
+        pullRaf = 0;
         if (offState === 'idle' && pull > 0 && performance.now() - lastPullAt > 420) setPull(pull - 0.012);
-        requestAnimationFrame(pullDecay);
+        if (pull > 0 && !pullRaf) pullRaf = requestAnimationFrame(pullDecay);
       };
-      requestAnimationFrame(pullDecay);
 
       addEventListener(
         'wheel',
@@ -1227,26 +1232,44 @@ const termPayload = {
       } else {
         lenis = new Lenis({ lerp: 0.085, anchors: true });
         lenis.on('scroll', update);
+
+        // El bucle sólo gira mientras haya algo que mover (scroll, inercia, glitch, inclinación
+        // del paquete). En reposo se duerme y cualquier entrada del usuario lo despierta.
+        let raf = 0;
+        let calm = 0;
         const loop = (time: number) => {
           lenis?.raf(time);
           mx += (tx - mx) * 0.06;
           my += (ty - my) * 0.06;
-          stage.style.setProperty('--mx', mx.toFixed(3));
-          stage.style.setProperty('--my', my.toFixed(3));
           const dy = Math.abs(scrollY - lastY);
           lastY = scrollY;
-          glitch += (Math.max(clamp(dy / 70), pull * 0.85) - glitch) * 0.12;
+          const aim = Math.max(clamp(dy / 70), pull * 0.85);
+          glitch += (aim - glitch) * 0.12;
+          stage.style.setProperty('--mx', mx.toFixed(3));
+          stage.style.setProperty('--my', my.toFixed(3));
           root.style.setProperty('--g', glitch.toFixed(3));
           document.body.classList.toggle('warp', glitch > 0.28);
           track.style.opacity = String(Math.min(0.55, glitch * 0.9));
-          track.style.transform = `translateY(${((time * 0.35) % innerHeight).toFixed(0)}px)`;
-          requestAnimationFrame(loop);
+          if (glitch > 0.01) track.style.transform = `translateY(${((time * 0.35) % innerHeight).toFixed(0)}px)`;
+
+          const busy =
+            lenis?.isScrolling || dy > 0.1 || Math.abs(aim - glitch) > 0.002 || Math.abs(tx - mx) > 0.002 || Math.abs(ty - my) > 0.002;
+          calm = busy ? 0 : calm + 1;
+          raf = calm > 20 ? 0 : requestAnimationFrame(loop);
         };
-        requestAnimationFrame(loop);
+        wake = () => {
+          calm = 0;
+          if (!raf) raf = requestAnimationFrame(loop);
+        };
+        for (const ev of ['wheel', 'touchstart', 'touchmove', 'keydown', 'pointerdown', 'click', 'scroll', 'resize'])
+          addEventListener(ev, wake, { passive: true, capture: true });
+        document.addEventListener('visibilitychange', wake);
+        wake();
         if (matchMedia('(hover: hover)').matches) {
           addEventListener('pointermove', (e) => {
             tx = (e.clientX / innerWidth) * 2 - 1;
             ty = (e.clientY / innerHeight) * 2 - 1;
+            wake();
           });
         }
       }
