@@ -103,7 +103,14 @@ export function startBackdrop(canvas: HTMLCanvasElement, reduce: boolean) {
     { base: 0.06, amp: 0.07, k: 0.034, speed: 0.1, color: LIME, fill: 0.34, line: 0.8, seed: rnd() * 100 },
   ];
 
+  // se lee fuera del bucle: scrollHeight fuerza un layout si el DOM cambió en el mismo frame
+  let scrollMax = 1;
+  const measure = () => {
+    scrollMax = Math.max(1, document.documentElement.scrollHeight - innerHeight);
+  };
+
   function resize() {
+    measure();
     W = Math.max(1, Math.ceil(innerWidth / PX));
     H = Math.max(1, Math.ceil(innerHeight / PX));
     canvas.width = W;
@@ -150,8 +157,7 @@ export function startBackdrop(canvas: HTMLCanvasElement, reduce: boolean) {
   function frame(t: number) {
     img.data.fill(0);
     const sy = scrollY / PX;
-    const max = Math.max(1, document.documentElement.scrollHeight - innerHeight);
-    const prog = scrollY / max;
+    const prog = scrollY / scrollMax;
 
     for (const s of stars) {
       const y = (((s.y * H - sy * s.d * 0.06) % H) + H) % H;
@@ -213,13 +219,19 @@ export function startBackdrop(canvas: HTMLCanvasElement, reduce: boolean) {
     return;
   }
 
-  let last = 0;
+  // la puerta PLAY y el loader tapan el fondo por completo: no se pinta debajo
+  const root = document.documentElement;
+  const covered = () =>
+    root.classList.contains('has-gate') || (root.classList.contains('has-loader') && !root.classList.contains('loaded'));
+
+  // el relieve y los bugs van lentos: 20 fps bastan y el canvas se repinta la mitad de veces
+  // el temporizador evita despertar a la página en cada refresco de pantalla (60-144 Hz)
+  const STEP = 50;
   const loop = (t: number) => {
-    if (t - last > 33) {
-      last = t;
-      frame(t);
-    }
-    requestAnimationFrame(loop);
+    if (!document.hidden && !covered()) frame(t);
+    setTimeout(() => requestAnimationFrame(loop), STEP);
   };
   requestAnimationFrame(loop);
+  addEventListener('load', measure);
+  addEventListener('hashchange', measure);
 }
